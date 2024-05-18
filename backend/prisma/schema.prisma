@@ -30,6 +30,7 @@ model users {
   cart     carts[]
   orders   orders[]
   deleted  Boolean  @default(false)
+  custom_builds custom_builds[]
 }
 
 model products {
@@ -43,8 +44,26 @@ model products {
   type_id         Int
   carts_products  carts_products[]
   deleted         Boolean           @default(false)
+
+  socket          String?
+  ram_type        String?
+  ram_types       ram_type[]
+  form_factor     String?
+  gpu_width       Int?
+  gpu_height      Int?
+  ram_capacity    Int?
+
   characteristics characteristics[]
   order_products  order_products[]
+  custom_builds_processor custom_builds[] @relation("Processor")
+  custom_builds_motherboard custom_builds[] @relation("Motherboard")
+  custom_builds_videocard custom_builds[] @relation("Videocard")
+  custom_builds_ram custom_builds[] @relation("Ram")
+  custom_builds_powerblock custom_builds[] @relation("Powerblock")
+  custom_builds_drive custom_builds[] @relation("Drive")
+  custom_builds_case custom_builds[] @relation("Case")
+  custom_builds_cooling custom_builds[] @relation("Cooling")
+
 }
 
 model characteristics {
@@ -58,7 +77,7 @@ model characteristics {
 
 model types {
   id       Int        @id @default(autoincrement())
-  name     String
+  name     String     @unique
   url      String     @unique
   image_id Int
   image    images     @relation(fields: [image_id], references: [id])
@@ -113,4 +132,44 @@ model carts_products {
   product_id Int
   product    products @relation(fields: [product_id], references: [id])
   quantity   Int
+}
+
+model custom_builds {
+  id             Int        @id @default(autoincrement())
+  user_id        Int
+  user           users      @relation(fields: [user_id], references: [id])
+  created        DateTime   @default(now())
+
+  processor_id   Int?
+  processor      products?   @relation("Processor", fields: [processor_id], references: [id])
+  
+  motherboard_id Int?
+  motherboard    products?   @relation("Motherboard", fields: [motherboard_id], references: [id])
+
+  videocard_id   Int?
+  videocard      products?   @relation("Videocard", fields: [videocard_id], references: [id])
+
+  ram_id         Int?
+  ram            products?   @relation("Ram", fields: [ram_id], references: [id])
+  ram_quantity   Int?
+
+  powerblock_id  Int?
+  powerblock     products?   @relation("Powerblock", fields: [powerblock_id], references: [id])
+
+  drive_id       Int?
+  drive          products?   @relation("Drive", fields: [drive_id], references: [id])
+
+  case_id        Int?
+  case           products?   @relation("Case", fields: [case_id], references: [id])
+
+  cooling_id     Int?
+  cooling        products?   @relation("Cooling", fields: [cooling_id], references: [id])
+
+}
+
+model ram_type {
+  id            Int         @id @default(autoincrement())
+  name          String
+  product_id    Int
+  product       products @relation(fields: [product_id], references: [id])
 }

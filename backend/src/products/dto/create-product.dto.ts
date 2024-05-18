@@ -8,14 +8,14 @@ import {
 } from 'class-validator';
 
 export class CreateProductDto {
-  @ApiProperty({ example: 'Santo Stefano Vacanze romane' })
+  @ApiProperty({ example: 'GTX 1070' })
   @IsNotEmpty()
   @IsString()
   name: string;
 
   @ApiProperty({
     example:
-      'Это вино было создано богами в древнем риме когда фронтенд писали на razor asp.net',
+      'Эта видеокарта была создана людьми для использования в играх. Она имеет 8 ГБ видеопамяти, 1070',
   })
   @IsNotEmpty()
   @IsString()
@@ -23,15 +23,15 @@ export class CreateProductDto {
 
   @ApiProperty({
     example: [
-      { key: 'Страна', value: 'Италия', rowKey: '1' },
-      { key: 'Артикул', value: 'Santo Stefano', rowKey: '2' },
+      { key: 'Страна', value: 'Тайвань', rowKey: '1' },
+      { key: 'Артикул', value: 'GTX 1070', rowKey: '2' },
     ],
   })
   @IsNotEmpty()
   @IsArray()
   characteristics: CharacteristicDto[];
 
-  @ApiProperty({ example: 499 })
+  @ApiProperty({ example: 14999.99 })
   @IsNotEmpty()
   @IsNumber()
   price: number;
@@ -45,6 +45,36 @@ export class CreateProductDto {
   @IsNotEmpty()
   @IsNumber()
   type_id: number;
+
+  @ApiProperty({ example: 'LGA 1151' })
+  @IsOptional()
+  @IsString()
+  socket?: string;
+
+  @ApiProperty({ example: 'DDR4' })
+  @IsOptional()
+  @IsString()
+  ram_type: string;
+
+  @ApiProperty({ example: 'ATX' })
+  @IsOptional()
+  @IsString()
+  form_factor: string;
+
+  @ApiProperty({ example : 30})
+  @IsOptional()
+  @IsNumber()
+  gpu_width: number;
+
+  @ApiProperty({ example : 5})
+  @IsOptional()
+  @IsNumber()
+  gpu_height: number;
+
+  @ApiProperty({ example: 8 })
+  @IsOptional()
+  @IsNumber()
+  ram_capacity: number;
 }
 
 class CharacteristicDto {

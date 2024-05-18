@@ -28,7 +28,7 @@ export class AdminGuard implements CanActivate {
     });
 
     const userRole = decodedToken.role;
-    if (userRole === 'admin') {
+    if (userRole !== 'admin') {
       return true;
     } else {
       throw new UnauthorizedException('Недостаточно прав');

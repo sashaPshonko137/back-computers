@@ -38,19 +38,13 @@ export class CartsService {
   }
 
   async update(id: number, updateCartDto: UpdateCartDto) {
-    const cart = await this.findOne(id);
-    if (!cart) {
-      throw new NotFoundException('id указан неверно.');
-    }
+    await this.findOne(id);
     await this.db.carts.update({ where: { id }, data: { ...updateCartDto } });
     return { message: 'Корзина обновлена.' };
   }
 
   async remove(id: number) {
-    const cart = await this.findOne(id);
-    if (!cart) {
-      throw new NotFoundException('id указан неправильно.');
-    }
+    await this.findOne(id);
     await this.db.carts.delete({ where: { id } });
     return { message: 'Корзина удалена.' };
   }
