@@ -30,8 +30,6 @@ export class CustomBuildsService {
       videocard_id,
       ram_id,
       ram_quantity,
-      powerblock_id,
-      drive_id,
       case_id,
       cooling_id,
     } = createCustomBuildDto;
@@ -40,146 +38,134 @@ export class CustomBuildsService {
       processor,
       motherboard,
       videocard,
-      ram,
       ram_types,
-      powerblock,
-      drive,
+      ram_types_ram,
+      ram_types_motherboard,
       case_product,
       cooling,
     ] = await Promise.all([
       processor_id && this.productsService.findOne(processor_id),
       motherboard_id && this.productsService.findOne(motherboard_id),
       videocard_id && this.productsService.findOne(videocard_id),
-      ram_id && this.productsService.findOne(ram_id),
       processor_id && this.ramTypesService.findByProductId(processor_id),
-      powerblock_id && this.productsService.findOne(powerblock_id),
-      drive_id && this.productsService.findOne(drive_id),
+      processor_id && this.ramTypesService.findByProductId(ram_id),
+      processor_id && this.ramTypesService.findByProductId(motherboard_id),
       case_id && this.productsService.findOne(case_id),
       cooling_id && this.productsService.findOne(cooling_id),
     ]);
 
-    // if (
-    //   processor &&
-    //   processor.socket &&
-    //   motherboard &&
-    //   motherboard.socket &&
-    //   processor.socket !== motherboard.socket
-    // ) {
-    //   throw new BadRequestException(
-    //     'Сокеты процессора и материнской платы не совпадают!',
-    //   );
-    // }
+    if (
+      processor &&
+      processor.socket &&
+      motherboard &&
+      motherboard.socket &&
+      processor.socket !== motherboard.socket
+    ) {
+      throw new BadRequestException(
+        'Сокеты процессора и материнской платы не совпадают!',
+      );
+    }
 
-    // if (
-    //   motherboard &&
-    //   motherboard.socket &&
-    //   cooling &&
-    //   cooling.socket &&
-    //   motherboard.socket !== cooling.socket
-    // ) {
-    //   throw new BadRequestException(
-    //     'Сокеты системы охлаждения процессора и материнской платы не совпадают!',
-    //   );
-    // }
+    if (
+      motherboard &&
+      motherboard.socket &&
+      cooling &&
+      cooling.socket &&
+      motherboard.socket !== cooling.socket
+    ) {
+      throw new BadRequestException(
+        'Сокеты системы охлаждения процессора и материнской платы не совпадают!',
+      );
+    }
 
-    // if (
-    //   cooling &&
-    //   cooling.socket &&
-    //   processor &&
-    //   processor.socket &&
-    //   cooling.socket !== processor.socket
-    // ) {
-    //   throw new BadRequestException(
-    //     'Сокеты системы охлаждения процессора и процессора не совпадают!',
-    //   );
-    // }
+    if (
+      cooling &&
+      cooling.socket &&
+      processor &&
+      processor.socket &&
+      cooling.socket !== processor.socket
+    ) {
+      throw new BadRequestException(
+        'Сокеты системы охлаждения процессора и процессора не совпадают!',
+      );
+    }
 
-    // // if (
-    // //   (ram_types &&
-    // //     ram &&
-    // //     ram.ram_types[0].name &&
-    // //     !ram_types.some(
-    // //       (ram_type) => ram_type.name === ram.ram_types[0].name,
-    // //     )) &&
-    // //   !ram_types.some(
-    // //     (ram_type) => ram_type.name === ram.ram_types[1].name
-    // //   )
-    // // ) {
-    // //   throw new BadRequestException(
-    // //     'Процессор не совместим с типом оперативной памяти!',
-    // //   );
-    // // }
+    if (
+      (ram_types &&
+        ram_types_ram &&
+        !ram_types.some(
+          (ram_type) => ram_type.name === ram_types_ram[0].name,
+        )) 
+    ) {
+      throw new BadRequestException(
+        'Процессор не совместим с типом оперативной памяти!',
+      );
+    }
 
-    // // if (
-    // //   (ram_types &&
-    // //     motherboard &&
-    // //     motherboard.ram_types[0].name &&
-    // //     !ram_types.some(
-    // //       (ram_type) => ram_type.name === motherboard.ram_types[0].name,
-    // //     )) &&
-    // //     !ram_types.some(
-    // //       (ram_type) => ram_type.name === motherboard.ram_types[1].name
-    // //     )
-    // // ) {
-    // //   throw new BadRequestException(
-    // //     'Материнская плата не совместима с типом оперативной памяти процессора!',
-    // //   );
-    // // }
+    if (
+      (ram_types &&
+        ram_types_motherboard[0].name &&
+        !ram_types.some(
+          (ram_type) => ram_type.name === ram_types_motherboard[0].name,
+        )) 
+    ) {
+      throw new BadRequestException(
+        'Материнская плата не совместима с типом оперативной памяти процессора!',
+      );
+    }
 
-    // // if (
-    // //   ram &&
-    // //   ram.ram_types[0].name &&
-    // //   motherboard &&
-    // //   motherboard.ram_types[0].name &&
-    // //   ram.ram_types[0].name !== motherboard.ram_types[0].name
-    // // ) {
-    // //   throw new BadRequestException(
-    // //     'Материнская плата не совместима с типом оперативной памяти!',
-    // //   );
-    // // }
+    if (
+      ram_types_ram &&
+      ram_types_motherboard &&
+      ram_types_ram[0].name === ram_types_motherboard[0].name
+    ) {
+      throw new BadRequestException(
+        'Материнская плата не совместима с типом оперативной памяти!',
+      );
+    }
 
-    // if (
-    //   motherboard &&
-    //   motherboard.form_factor &&
-    //   case_product &&
-    //   case_product.form_factor &&
-    //   motherboard.form_factor !== case_product.form_factor
-    // ) {
-    //   throw new BadRequestException(
-    //     'Форм фактор материнской платы не совпадает с форм фактором корпуса!',
-    //   );
-    // }
+    if (
+      motherboard &&
+      motherboard.form_factor &&
+      case_product &&
+      case_product.form_factor &&
+      motherboard.form_factor !== case_product.form_factor
+    ) {
+      throw new BadRequestException(
+        'Форм фактор материнской платы не совпадает с форм фактором корпуса!',
+      );
+    }
 
-    // if (
-    //   videocard &&
-    //   videocard.gpu_height &&
-    //   case_product &&
-    //   case_product.gpu_height &&
-    //   videocard.gpu_height > case_product.gpu_height
-    // ) {
-    //   throw new BadRequestException('Длина видеокарты слишком большая!');
-    // }
+    if (
+      videocard &&
+      videocard.gpu_height &&
+      case_product &&
+      case_product.gpu_height &&
+      videocard.gpu_height > case_product.gpu_height
+    ) {
+      throw new BadRequestException('Длина видеокарты слишком большая!');
+    }
 
-    // if (
-    //   videocard &&
-    //   videocard.gpu_width &&
-    //   case_product &&
-    //   case_product.gpu_width &&
-    //   videocard.gpu_width > case_product.gpu_width
-    // ) {
-    //   throw new BadRequestException('Ширина видеокарты слишком большая!');
-    // }
+    if (
+      videocard &&
+      videocard.gpu_width &&
+      case_product &&
+      case_product.gpu_width &&
+      videocard.gpu_width > case_product.gpu_width
+    ) {
+      throw new BadRequestException('Ширина видеокарты слишком большая!');
+    }
 
-    // if (
-    //   motherboard &&
-    //   motherboard.ram_capacity &&
-    //   ram_quantity &&
-    //   ram_quantity > motherboard.ram_capacity
-    // ) {
-    //   throw new BadRequestException(
-    //     'Количество планок оперативной памяти больше, чем слотов в материнской плате!',
-    //   );
-    // }
+    if (
+      motherboard &&
+      motherboard.ram_capacity &&
+      ram_quantity &&
+      ram_quantity > motherboard.ram_capacity
+    ) {
+      throw new BadRequestException(
+        'Количество планок оперативной памяти больше, чем слотов в материнской плате!',
+      );
+    }
 
     const build = await this.db.custom_builds.create({
       data: {
@@ -215,8 +201,6 @@ export class CustomBuildsService {
       videocard_id,
       ram_id,
       ram_quantity,
-      powerblock_id,
-      drive_id,
       case_id,
       cooling_id,
     } = updateCustomBuildDto;
@@ -225,142 +209,134 @@ export class CustomBuildsService {
       processor,
       motherboard,
       videocard,
-      ram,
       ram_types,
-      powerblock,
-      drive,
+      ram_types_ram,
+      ram_types_motherboard,
       case_product,
       cooling,
     ] = await Promise.all([
-      this.productsService.findOne(processor_id),
-      this.productsService.findOne(motherboard_id),
-      this.productsService.findOne(videocard_id),
-      this.productsService.findOne(ram_id),
-      this.db.ram_type.findMany({ where: { product_id: processor_id } }),
-      this.productsService.findOne(powerblock_id),
-      this.productsService.findOne(drive_id),
-      this.productsService.findOne(case_id),
-      this.productsService.findOne(cooling_id),
+      processor_id && this.productsService.findOne(processor_id),
+      motherboard_id && this.productsService.findOne(motherboard_id),
+      videocard_id && this.productsService.findOne(videocard_id),
+      processor_id && this.ramTypesService.findByProductId(processor_id),
+      processor_id && this.ramTypesService.findByProductId(ram_id),
+      processor_id && this.ramTypesService.findByProductId(motherboard_id),
+      case_id && this.productsService.findOne(case_id),
+      cooling_id && this.productsService.findOne(cooling_id),
     ]);
 
-    // if (
-    //   processor &&
-    //   processor.socket &&
-    //   motherboard &&
-    //   motherboard.socket &&
-    //   processor.socket !== motherboard.socket
-    // ) {
-    //   throw new BadRequestException(
-    //     'Сокеты процессора и материнской платы не совпадают!',
-    //   );
-    // }
+    if (
+      processor &&
+      processor.socket &&
+      motherboard &&
+      motherboard.socket &&
+      processor.socket !== motherboard.socket
+    ) {
+      throw new BadRequestException(
+        'Сокеты процессора и материнской платы не совпадают!',
+      );
+    }
 
-    // if (
-    //   motherboard &&
-    //   motherboard.socket &&
-    //   cooling &&
-    //   cooling.socket &&
-    //   motherboard.socket !== cooling.socket
-    // ) {
-    //   throw new BadRequestException(
-    //     'Сокеты системы охлаждения процессора и материнской платы не совпадают!',
-    //   );
-    // }
+    if (
+      motherboard &&
+      motherboard.socket &&
+      cooling &&
+      cooling.socket &&
+      motherboard.socket !== cooling.socket
+    ) {
+      throw new BadRequestException(
+        'Сокеты системы охлаждения процессора и материнской платы не совпадают!',
+      );
+    }
 
-    // if (
-    //   cooling &&
-    //   cooling.socket &&
-    //   processor &&
-    //   processor.socket &&
-    //   cooling.socket !== processor.socket
-    // ) {
-    //   throw new BadRequestException(
-    //     'Сокеты системы охлаждения процессора и процессора не совпадают!',
-    //   );
-    // }
+    if (
+      cooling &&
+      cooling.socket &&
+      processor &&
+      processor.socket &&
+      cooling.socket !== processor.socket
+    ) {
+      throw new BadRequestException(
+        'Сокеты системы охлаждения процессора и процессора не совпадают!',
+      );
+    }
 
-    // if (
-    //   (ram_types &&
-    //     ram &&
-    //     ram.ram_types[0].name &&
-    //     !ram_types.some(
-    //       (ram_type) => ram_type.name === ram.ram_types[0].name,
-    //     )) ||
-    //   !ram_types
-    // ) {
-    //   throw new BadRequestException(
-    //     'Процессор не совместим с типом оперативной памяти!',
-    //   );
-    // }
+    if (
+      (ram_types &&
+        ram_types_ram &&
+        !ram_types.some(
+          (ram_type) => ram_type.name === ram_types_ram[0].name,
+        )) 
+    ) {
+      throw new BadRequestException(
+        'Процессор не совместим с типом оперативной памяти!',
+      );
+    }
 
-    // if (
-    //   (ram_types &&
-    //     motherboard &&
-    //     motherboard.ram_types[0].name &&
-    //     !ram_types.some(
-    //       (ram_type) => ram_type.name === motherboard.ram_types[0].name,
-    //     )) ||
-    //   !ram_types
-    // ) {
-    //   throw new BadRequestException(
-    //     'Материнская плата не совместима с типом оперативной памяти процессора!',
-    //   );
-    // }
+    if (
+      (ram_types &&
+        ram_types_motherboard[0].name &&
+        !ram_types.some(
+          (ram_type) => ram_type.name === ram_types_motherboard[0].name,
+        )) 
+    ) {
+      throw new BadRequestException(
+        'Материнская плата не совместима с типом оперативной памяти процессора!',
+      );
+    }
 
-    // if (
-    //   ram &&
-    //   ram.ram_types[0].name &&
-    //   motherboard &&
-    //   motherboard.ram_types[0].name &&
-    //   ram.ram_types[0].name !== motherboard.ram_types[0].name
-    // ) {
-    //   throw new BadRequestException(
-    //     'Материнская плата не совместима с типом оперативной памяти!',
-    //   );
-    // }
+    if (
+      ram_types_ram &&
+      ram_types_motherboard &&
+      ram_types_ram[0].name === ram_types_motherboard[0].name
+    ) {
+      throw new BadRequestException(
+        'Материнская плата не совместима с типом оперативной памяти!',
+      );
+    }
 
-    // if (
-    //   motherboard &&
-    //   motherboard.form_factor &&
-    //   case_product &&
-    //   case_product.form_factor &&
-    //   motherboard.form_factor !== case_product.form_factor
-    // ) {
-    //   throw new BadRequestException(
-    //     'Форм фактор материнской платы не совпадает с форм фактором корпуса!',
-    //   );
-    // }
+    if (
+      motherboard &&
+      motherboard.form_factor &&
+      case_product &&
+      case_product.form_factor &&
+      motherboard.form_factor !== case_product.form_factor
+    ) {
+      throw new BadRequestException(
+        'Форм фактор материнской платы не совпадает с форм фактором корпуса!',
+      );
+    }
 
-    // if (
-    //   videocard &&
-    //   videocard.gpu_height &&
-    //   case_product &&
-    //   case_product.gpu_height &&
-    //   videocard.gpu_height > case_product.gpu_height
-    // ) {
-    //   throw new BadRequestException('Длина видеокарты слишком большая!');
-    // }
+    if (
+      videocard &&
+      videocard.gpu_height &&
+      case_product &&
+      case_product.gpu_height &&
+      videocard.gpu_height > case_product.gpu_height
+    ) {
+      throw new BadRequestException('Длина видеокарты слишком большая!');
+    }
 
-    // if (
-    //   videocard &&
-    //   videocard.gpu_width &&
-    //   case_product &&
-    //   case_product.gpu_width &&
-    //   videocard.gpu_width > case_product.gpu_width
-    // ) {
-    //   throw new BadRequestException('Ширина видеокарты слишком большая!');
-    // }
+    if (
+      videocard &&
+      videocard.gpu_width &&
+      case_product &&
+      case_product.gpu_width &&
+      videocard.gpu_width > case_product.gpu_width
+    ) {
+      throw new BadRequestException('Ширина видеокарты слишком большая!');
+    }
 
-    // if (
-    //   motherboard &&
-    //   motherboard.ram_capacity &&
-    //   ram_quantity &&
-    //   ram_quantity > motherboard.ram_capacity
-    // ) {
-    //   throw new BadRequestException(
-    //     'Количество планок оперативной памяти больше, чем слотов в материнской плате!',
-    //   );
-    // }
+    if (
+      motherboard &&
+      motherboard.ram_capacity &&
+      ram_quantity &&
+      ram_quantity > motherboard.ram_capacity
+    ) {
+      throw new BadRequestException(
+        'Количество планок оперативной памяти больше, чем слотов в материнской плате!',
+      );
+    }
 
     return await this.db.custom_builds.update({
       where: { id },
