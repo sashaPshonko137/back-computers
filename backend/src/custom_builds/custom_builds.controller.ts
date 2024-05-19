@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
 import { CustomBuildsService } from './custom_builds.service';
 import { CreateCustomBuildDto } from './dto/create-custom_build.dto';
 import { UpdateCustomBuildDto } from './dto/update-custom_build.dto';
@@ -25,7 +34,10 @@ export class CustomBuildsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCustomBuildDto: UpdateCustomBuildDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateCustomBuildDto: UpdateCustomBuildDto,
+  ) {
     return this.customBuildsService.update(+id, updateCustomBuildDto);
   }
 

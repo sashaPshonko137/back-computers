@@ -5,7 +5,6 @@ import { ImagesService } from 'src/images/images.service';
 import { TypesService } from 'src/types/types.service';
 import { UsersModule } from 'src/users/users.module';
 import { ProductsService } from './products.service';
-import { RamTypesService } from 'src/ram_types/ram_types.service';
 import { RamTypesModule } from 'src/ram_types/ram_types.module';
 
 @Module({

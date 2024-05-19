@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
 import { RamTypesService } from './ram_types.service';
 import { CreateRamTypeDto } from './dto/create-ram_type.dto';
 import { UpdateRamTypeDto } from './dto/update-ram_type.dto';

@@ -13,11 +13,16 @@ export class TypesService {
   async create(createTypeDto: CreateTypeDto) {
     const image = await this.imagesService.findOne(createTypeDto.image_id);
     const type = await this.findOneByUrl(createTypeDto.url);
+    const typeByName = await this.findOneByName(createTypeDto.name);
+
     if (!image) {
       throw new NotFoundException('Такого изображения не существует.');
     }
     if (type) {
       throw new NotFoundException('Категория с таким url уже существует.');
+    }
+    if (typeByName) {
+      throw new NotFoundException('Категория с таким именем уже существует.');
     }
     await this.db.types.create({ data: { ...createTypeDto } });
     return { message: 'Категория создана.' };
@@ -44,6 +49,11 @@ export class TypesService {
 
   async findOneByUrl(url: string) {
     const type = await this.db.types.findFirst({ where: { url } });
+    return type;
+  }
+
+  async findOneByName(name: string) {
+    const type = await this.db.types.findFirst({ where: { name } });
     return type;
   }
 
@@ -88,9 +98,11 @@ export class TypesService {
     // generate random integer between 0 and 9999
     const randomInt = Math.floor(Math.random() * 9999);
     const url = `${type.url}-${randomInt}-deleted`;
+    const name = `${type.name}-${randomInt}-deleted`;
+
     await this.db.types.update({
       where: { id },
-      data: { deleted: true, url: url },
+      data: { deleted: true, url: url, name: name },
     });
 
     return { message: 'Категория удалена.' };

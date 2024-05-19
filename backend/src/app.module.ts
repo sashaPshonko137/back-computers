@@ -15,7 +15,6 @@ import { ConfigModule } from '@nestjs/config';
 import { MailService } from './utils/mailer/mailer';
 import { CustomBuildsModule } from './custom_builds/custom_builds.module';
 import { RamTypesModule } from './ram_types/ram_types.module';
-import { ProductsService } from './products/products.service';
 
 @Module({
   imports: [

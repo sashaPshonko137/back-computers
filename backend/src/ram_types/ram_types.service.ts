@@ -1,4 +1,9 @@
-import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateRamTypeDto } from './dto/create-ram_type.dto';
 import { UpdateRamTypeDto } from './dto/update-ram_type.dto';
 import { PrismaService } from 'src/utils/db/prisma.service';
@@ -7,12 +12,14 @@ import { ProductsService } from 'src/products/products.service';
 @Injectable()
 export class RamTypesService {
   constructor(
-    private db: PrismaService, 
+    private db: PrismaService,
     @Inject(forwardRef(() => ProductsService))
     private productsService: ProductsService,
   ) {}
   async create(createRamTypeDto: CreateRamTypeDto) {
-    const product = await this.productsService.findOne(createRamTypeDto.product_id);
+    const product = await this.productsService.findOne(
+      createRamTypeDto.product_id,
+    );
     if (!product) {
       throw new NotFoundException('product_id указан неверно.');
     }
@@ -43,7 +50,9 @@ export class RamTypesService {
   async update(id: number, updateRamTypeDto: UpdateRamTypeDto) {
     await this.findOne(id);
 
-    const product = await this.productsService.findOne(updateRamTypeDto.product_id);
+    const product = await this.productsService.findOne(
+      updateRamTypeDto.product_id,
+    );
     if (!product) {
       throw new NotFoundException('product_id указан неверно.');
     }

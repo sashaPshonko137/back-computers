@@ -46,7 +46,6 @@ model products {
   deleted         Boolean           @default(false)
 
   socket          String?
-  ram_type        String?
   ram_types       ram_type[]
   form_factor     String?
   gpu_width       Int?

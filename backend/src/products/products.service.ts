@@ -1,10 +1,17 @@
-import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PrismaService } from 'src/utils/db/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ImagesService } from 'src/images/images.service';
 import { TypesService } from 'src/types/types.service';
 import { RamTypesService } from 'src/ram_types/ram_types.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ProductsService {
@@ -71,7 +78,7 @@ export class ProductsService {
       throw new NotFoundException('Необходимо указать тип оперативной памяти.');
     }
 
-    const { characteristics, ...productData } = createProductDto;
+    const { characteristics, ram_type, ...productData } = createProductDto;
 
     const product = await this.db.products.create({
       data: {
@@ -81,6 +88,11 @@ export class ProductsService {
             key: char.key,
             value: char.value,
             rowKey: char.rowKey,
+          })),
+        },
+        ram_types: {
+          create: ram_type?.map((ram) => ({
+            name: ram.name,
           })),
         },
       },
@@ -154,151 +166,262 @@ export class ProductsService {
   }
 
   async findByBuild(id: number, url: string) {
-     const build = await this.db.custom_builds.findFirst({ where: { id } });
-     if (!build) {
-       throw new NotFoundException('Сборка не найдена.');
-     }
-     
-     const {
+    const build = await this.db.custom_builds.findFirst({ where: { id } });
+    if (!build) {
+      throw new NotFoundException('Сборка не найдена.');
+    }
+
+    const {
       processor_id,
       motherboard_id,
       videocard_id,
       ram_id,
-      ram_quantity,
       powerblock_id,
       drive_id,
       case_id,
       cooling_id,
     } = build;
-  
+
     const [
       processor,
       motherboard,
       videocard,
       ram,
-      ram_types,
       powerblock,
       drive,
       case_product,
       cooling,
     ] = await Promise.all([
-      processor_id && this.findOne(processor_id),
-      motherboard_id &&this.findOne(motherboard_id),
-      videocard_id && this.findOne(videocard_id),
-      ram_id && this.findOne(ram_id),
-      processor_id && this.ramTypesService.findByProductId(processor_id),
-      powerblock_id && this.findOne(powerblock_id),
-      drive_id && this.findOne(drive_id),
-      case_id &&this.findOne(case_id),
-      cooling_id && this.findOne(cooling_id),
+      processor_id &&
+        this.db.products.findFirst({
+          where: {
+            id: processor_id,
+            type: { url: 'processor' },
+            deleted: false,
+          },
+          select: { socket: true, ram_types: true },
+        }),
+      motherboard_id &&
+        this.db.products.findFirst({
+          where: {
+            id: motherboard_id,
+            type: { url: 'motherboard' },
+            deleted: false,
+          },
+          select: {
+            socket: true,
+            ram_types: true,
+            form_factor: true,
+            ram_capacity: true,
+          },
+        }),
+      videocard_id &&
+        this.db.products.findFirst({
+          where: {
+            id: videocard_id,
+            type: { url: 'videocard' },
+            deleted: false,
+          },
+        }),
+      ram_id &&
+        this.db.products.findFirst({
+          where: { id: ram_id, type: { url: 'ram' }, deleted: false },
+          select: { ram_types: true },
+        }),
+      powerblock_id &&
+        this.db.products.findFirst({
+          where: {
+            id: powerblock_id,
+            type: { url: 'powerblock' },
+            deleted: false,
+          },
+        }),
+      drive_id &&
+        this.db.products.findFirst({
+          where: { id: drive_id, type: { url: 'drive' }, deleted: false },
+        }),
+      case_id &&
+        this.db.products.findFirst({
+          where: { id: case_id, type: { url: 'case' }, deleted: false },
+          select: { form_factor: true, gpu_height: true, gpu_width: true },
+        }),
+      cooling_id &&
+        this.db.products.findFirst({
+          where: { id: cooling_id, type: { url: 'cooling' }, deleted: false },
+          select: { socket: true },
+        }),
     ]);
 
-    
     switch (url) {
-      case "processor":
-        const processorType = await this.db.types.findFirst({ where: { url: "processor" } });
-        const ram_types = await this.ramTypesService.findByProductId(processor_id);
-
-        if (!motherboard_id && !cooling_id && !ram_id)
-          return await this.db.products.findMany({
-            where: { 
-              deleted: false,  
-              type_id: processorType.id,
+      case 'processor':
+        const processorWhere: Prisma.productsWhereInput = {
+          deleted: false,
+          type: {
+            url: 'processor',
+          },
+        };
+        if (motherboard_id) {
+          processorWhere.socket = motherboard.socket;
+          processorWhere.ram_types = {
+            some: {
+              name:
+                motherboard.ram_types[0].name || motherboard.ram_types[1].name,
             },
-          });
-
-        if (motherboard_id && !cooling_id && !ram_id)
-          return await this.db.products.findMany({
-            where: { 
-              deleted: false,  
-              type_id: processorType.id,
-              socket: motherboard.socket
-              
+          };
+        }
+        if (cooling_id) {
+          processorWhere.socket = {
+            in: [...(processor_id ? [processor.socket] : []), cooling.socket],
+          };
+        }
+        if (ram_id) {
+          processorWhere.ram_types = {
+            some: {
+              name: ram.ram_types[0].name,
             },
-          });
+          };
+        }
+        console.log(processorWhere);
+        return await this.db.products.findMany({
+          where: processorWhere,
+        });
 
-        if (motherboard_id && cooling_id && !ram_id)
-          return await this.db.products.findMany({
-            where: { 
-              deleted: false,  
-              type_id: processorType.id,
-              socket: { 
-                in: [motherboard.socket, cooling.socket]
-              }
+      case 'motherboard':
+        const motherboardWhere: Prisma.productsWhereInput = {
+          deleted: false,
+          type: {
+            url: 'motherboard',
+          },
+        };
+        if (processor_id) {
+          motherboardWhere.socket = processor.socket;
+        }
+        if (cooling_id) {
+          motherboardWhere.socket = {
+            in: [...(processor_id ? [processor.socket] : []), cooling.socket],
+          };
+        }
+        if (ram_id) {
+          if (motherboard.ram_capacity < build.ram_quantity) {
+            throw new BadRequestException(
+              'Количество планок оперативной памяти не может быть больше чем количество слотов оперативной памяти в материнской плате.');
+          }
+          motherboardWhere.ram_types = {
+            some: {
+              name: ram.ram_types[0].name,
             },
-          });
+          };
+        }
+        if (case_id) {
+          motherboardWhere.form_factor = case_product.form_factor;
+        }
+        return await this.db.products.findMany({
+          where: motherboardWhere,
+        });
 
-        if (motherboard_id && cooling_id && ram_id)
-          return await this.db.products.findMany({
-            where: { 
-              deleted: false,  
-              type_id: processorType.id,
-              socket: { 
-                in: [motherboard.socket, cooling.socket]
-              },
-              
+      case 'videocard':
+        const videocardWhere: Prisma.productsWhereInput = {
+          deleted: false,
+          type: {
+            url: 'videocard',
+          },
+        };
+        // if (motherboard_id) {
+        //   videocardWhere.form_factor = motherboard.form_factor;
+        // }
+        if (case_id) {
+          videocardWhere.gpu_height = {
+            lte: case_product.gpu_height,
+          };
+          videocardWhere.gpu_width = {
+            lte: case_product.gpu_width,
+          };
+        }
+        return await this.db.products.findMany({
+          where: videocardWhere,
+        });
+      case 'ram':
+        const ramWhere: Prisma.productsWhereInput = {
+          deleted: false,
+          type: {
+            url: 'ram',
+          },
+        };
+        if (motherboard_id) {
+          ramWhere.ram_types = {
+            some: {
+              name:
+                motherboard.ram_types[0].name || motherboard.ram_types[1].name,
             },
-          });
+          };
+        }
+        return await this.db.products.findMany({
+          where: ramWhere,
+        });
 
-        if (!motherboard_id && cooling_id && ram_id)
-          return await this.db.products.findMany({
-            where: { 
-              deleted: false,  
-              type_id: processorType.id,
-              socket: cooling.socket,
-              ram_type: ram_types[0].name || ram_types[1].name
-            },
-          });
+      case 'powerblock':
+        const powerblockWhere: Prisma.productsWhereInput = {
+          deleted: false,
+          type: {
+            url: 'powerblock',
+          },
+        };
+        return await this.db.products.findMany({
+          where: powerblockWhere,
+        });
 
-        if (!motherboard_id && cooling_id && !ram_id)
-          return await this.db.products.findMany({
-            where: { 
-              deleted: false,  
-              type_id: processorType.id,
-              socket: cooling.socket
-            },
-          });
+      case 'drive':
+        const driveWhere: Prisma.productsWhereInput = {
+          deleted: false,
+          type: {
+            url: 'drive',
+          },
+        };
+        return await this.db.products.findMany({
+          where: driveWhere,
+        });
 
-        if (!motherboard_id && !cooling_id && ram_id)
-          return await this.db.products.findMany({
-            where: { 
-              deleted: false,  
-              type_id: processorType.id,
-              ram_type: ram_types[0].name || ram_types[1].name
-            },
-          });
+      case 'case':
+        const caseWhere: Prisma.productsWhereInput = {
+          deleted: false,
+          type: {
+            url: 'case',
+          },
+        };
+        if (motherboard_id) {
+          caseWhere.form_factor = motherboard.form_factor;
+        }
+        if (videocard_id) {
+          caseWhere.gpu_height = {
+            lte: videocard.gpu_height,
+          };
+          caseWhere.gpu_width = {
+            lte: videocard.gpu_width,
+          };
+        }
+        return await this.db.products.findMany({
+          where: caseWhere,
+        });
 
-          if (motherboard_id && !cooling_id && ram_id) 
-            return await this.db.products.findMany({
-              where: { 
-                deleted: false,  
-                type_id: processorType.id,
-                ram_type: ram_types[0].name || ram_types[1].name
-              },
-            });
-
-        break;
-
-        case "motherboard":
-          const motherboardType = await this.db.types.findFirst({ where: { url: "processor" } });
-        if (!processor_id && !cooling_id && !ram_id && !case_id)
-          return await this.db.products.findMany({
-            where: { 
-              deleted: false,  
-              type_id: motherboardType.id
-            },
-          });
-
-        if (processor_id && !cooling_id && !ram_id && !case_id)
-          return await this.db.products.findMany({
-            where: { 
-              deleted: false,  
-              type_id: motherboardType.id,
-              socket: processor.socket
-            },
-          });
+      case 'cooling':
+        const coolingWhere: Prisma.productsWhereInput = {
+          deleted: false,
+          type: {
+            url: 'cooling',
+          },
+        };
+        if (processor_id) {
+          coolingWhere.socket = processor.socket;
+        }
+        if (motherboard_id) {
+          coolingWhere.socket = motherboard.socket;
+        }
+        return await this.db.products.findMany({
+          where: coolingWhere,
+        });
+      default:
+        throw new NotFoundException('Такой категории не существует.');
     }
-
   }
 
   async findOne(id: number) {
@@ -308,6 +431,7 @@ export class ProductsService {
         characteristics: true,
         image: true,
         type: true,
+        ram_types: true,
       },
     });
     if (!product) {

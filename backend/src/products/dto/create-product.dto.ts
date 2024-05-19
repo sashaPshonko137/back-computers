@@ -51,22 +51,22 @@ export class CreateProductDto {
   @IsString()
   socket?: string;
 
-  @ApiProperty({ example: 'DDR4' })
+  @ApiProperty({ example: [{ name: 'DDR5' }, { name: 'DDR4' }] })
   @IsOptional()
-  @IsString()
-  ram_type: string;
+  @IsArray()
+  ram_type: RamTypeDto[];
 
   @ApiProperty({ example: 'ATX' })
   @IsOptional()
   @IsString()
   form_factor: string;
 
-  @ApiProperty({ example : 30})
+  @ApiProperty({ example: 30 })
   @IsOptional()
   @IsNumber()
   gpu_width: number;
 
-  @ApiProperty({ example : 5})
+  @ApiProperty({ example: 5 })
   @IsOptional()
   @IsNumber()
   gpu_height: number;
@@ -82,4 +82,9 @@ class CharacteristicDto {
   key: string;
   value: string;
   rowKey?: string;
+}
+
+class RamTypeDto {
+  id?: number;
+  name: string;
 }
