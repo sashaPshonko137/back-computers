@@ -18,7 +18,7 @@ import { ProductsModule } from 'src/products/products.module';
     ImagesService,
     TypesService,
     CartsService,
-    RamTypesService,
+    RamTypesService
   ],
   exports: [CustomBuildsService],
   imports: [forwardRef(() => ProductsModule)],

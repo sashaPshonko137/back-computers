@@ -37,6 +37,14 @@ export class CartsService {
     return cart;
   }
 
+  async findOneByUserId(id: number) {
+    const cart = await this.db.carts.findFirst({ where: { user_id: id } });
+    if (!cart) {
+      throw new NotFoundException('id указан неверно.');
+    }
+    return cart;
+  }
+
   async update(id: number, updateCartDto: UpdateCartDto) {
     await this.findOne(id);
     await this.db.carts.update({ where: { id }, data: { ...updateCartDto } });

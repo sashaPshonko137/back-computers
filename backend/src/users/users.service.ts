@@ -4,6 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/utils/db/prisma.service';
 import { CartsService } from 'src/carts/carts.service';
 
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -12,7 +13,8 @@ export class UsersService {
   ) {}
   async create(createUserDto: CreateUserDto) {
     const user = await this.db.users.create({ data: { ...createUserDto } });
-    this.cartsService.create({ user_id: user.id });
+    await this.cartsService.create({ user_id: user.id });
+    await this.db.custom_builds.create({ data: { user_id: user.id } });
     return user;
   }
 

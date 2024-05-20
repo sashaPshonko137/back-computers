@@ -9,6 +9,7 @@ import { PrismaService } from 'src/utils/db/prisma.service';
 import { ProductsService } from 'src/products/products.service';
 import { UsersService } from 'src/users/users.service';
 import { RamTypesService } from 'src/ram_types/ram_types.service';
+import { CartsService } from 'src/carts/carts.service';
 
 @Injectable()
 export class CustomBuildsService {
@@ -17,6 +18,7 @@ export class CustomBuildsService {
     private productsService: ProductsService,
     private usersSerice: UsersService,
     private ramTypesService: RamTypesService,
+    private cartsService: CartsService,
   ) {}
   async create(createCustomBuildDto: CreateCustomBuildDto) {
     const user = await this.usersSerice.findOne(createCustomBuildDto.user_id);
@@ -91,11 +93,9 @@ export class CustomBuildsService {
     }
 
     if (
-      (ram_types &&
-        ram_types_ram &&
-        !ram_types.some(
-          (ram_type) => ram_type.name === ram_types_ram[0].name,
-        )) 
+      ram_types &&
+      ram_types_ram &&
+      !ram_types.some((ram_type) => ram_type.name === ram_types_ram[0].name)
     ) {
       throw new BadRequestException(
         'Процессор не совместим с типом оперативной памяти!',
@@ -103,11 +103,11 @@ export class CustomBuildsService {
     }
 
     if (
-      (ram_types &&
-        ram_types_motherboard[0].name &&
-        !ram_types.some(
-          (ram_type) => ram_type.name === ram_types_motherboard[0].name,
-        )) 
+      ram_types &&
+      ram_types_motherboard[0].name &&
+      !ram_types.some(
+        (ram_type) => ram_type.name === ram_types_motherboard[0].name,
+      )
     ) {
       throw new BadRequestException(
         'Материнская плата не совместима с типом оперативной памяти процессора!',
@@ -262,11 +262,9 @@ export class CustomBuildsService {
     }
 
     if (
-      (ram_types &&
-        ram_types_ram &&
-        !ram_types.some(
-          (ram_type) => ram_type.name === ram_types_ram[0].name,
-        )) 
+      ram_types &&
+      ram_types_ram &&
+      !ram_types.some((ram_type) => ram_type.name === ram_types_ram[0].name)
     ) {
       throw new BadRequestException(
         'Процессор не совместим с типом оперативной памяти!',
@@ -274,11 +272,11 @@ export class CustomBuildsService {
     }
 
     if (
-      (ram_types &&
-        ram_types_motherboard[0].name &&
-        !ram_types.some(
-          (ram_type) => ram_type.name === ram_types_motherboard[0].name,
-        )) 
+      ram_types &&
+      ram_types_motherboard[0].name &&
+      !ram_types.some(
+        (ram_type) => ram_type.name === ram_types_motherboard[0].name,
+      )
     ) {
       throw new BadRequestException(
         'Материнская плата не совместима с типом оперативной памяти процессора!',
@@ -351,5 +349,47 @@ export class CustomBuildsService {
     }
     await this.db.custom_builds.delete({ where: { id } });
     return { message: 'Сборка удалена.' };
+  }
+
+  async addToCart(id: number) {
+    const build = await this.findOne(id);
+
+    const user_id = build.user_id;
+
+    const cart_id = (await this.cartsService.findOneByUserId(user_id)).id;
+
+    const ram_quantity = build.ram_quantity;
+
+    if (ram_quantity) delete build.ram_quantity;
+
+    const products = Object.entries(build).splice(0, 3);
+
+    await this.db.carts_products.createMany({
+      data: products.map((product: [key: string, value: number]) => ({
+        cart_id: cart_id,
+        product_id: product[1],
+        quantity: product[0] === 'ram_id' ? ram_quantity : 1,
+      })),
+    });
+
+    return await this.clear(build.user_id);
+  }
+
+  async clear(id: number) {
+    const build = await this.findOne(id);
+    return await this.db.custom_builds.updateMany({
+      where: { user_id: build.user_id },
+      data: {
+        case_id: null,
+        processor_id: null,
+        videocard_id: null,
+        ram_id: null,
+        motherboard_id: null,
+        cooling_id: null,
+        drive_id: null,
+        powerblock_id: null,
+        ram_quantity: null,
+      },
+    });
   }
 }
