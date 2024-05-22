@@ -11,9 +11,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
     // production port
-    // origin: ['http://localhost:4173'],
+    origin: ['https://technewshop.ru'],
     // development port
-    origin: ['http://localhost:5173'],
+    // origin: ['http://localhost:5173'],
     credentials: true,
   });
 
