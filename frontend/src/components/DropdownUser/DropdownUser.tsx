@@ -75,7 +75,7 @@ export const DropdownUser = () => {
           trigger={["click"]}
         >
           <div className={styles.dropdownWrapper}>
-            <Avatar>{userData.name.slice(0, 2)}</Avatar>
+            <Avatar className={styles.avatar}>{userData.name.slice(0, 2)}</Avatar>
             <Typography.Text>{userData.name}</Typography.Text>
             <DownOutlined className={styles.dropdownIcon} />
           </div>

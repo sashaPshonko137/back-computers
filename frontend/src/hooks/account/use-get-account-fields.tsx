@@ -38,6 +38,11 @@ export const useGetAccountFields = (args: IUseGetProfileFieldsArgs) => {
       label: accountFieldsTitles.email,
       node: <Input defaultValue={userData?.email} disabled={isEditAccount} />,
     },
+    {
+      name: accountFieldsDataIndexes.role,
+      label: accountFieldsTitles.role,
+      node: <Input defaultValue={userData?.role} disabled />,
+    },
   ];
 
   const FormItems = accountFields.map((field) => (

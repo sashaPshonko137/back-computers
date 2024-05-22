@@ -34,9 +34,12 @@ export const Navbar = () => {
 
   const MenuPoints = (
     <div className={styles.menuPoints}>
-      <Link to={RouterPath.catalog} onClick={handleCloseDrawer}>
-        <Button type="primary">
-          <MenuOutlined />
+      <Link
+        className={styles.catalogMobileLink}
+        to={RouterPath.catalog}
+        onClick={handleCloseDrawer}
+      >
+        <Button type="primary" block size="large" icon={<MenuOutlined />}  >
           Каталог
         </Button>
       </Link>
@@ -45,6 +48,7 @@ export const Navbar = () => {
         className={styles.searchInput}
         placeholder="Найти товар"
         onSearch={handleSearchProducts}
+        size="large"
       />
 
       <div className={styles.icons} onClick={handleCloseDrawer}>
@@ -75,13 +79,28 @@ export const Navbar = () => {
   return (
     <>
       <div className={styles.navbarWrapper}>
-        <Link to={RouterPath.main}>
-          <img
-            className={styles.logo}
-            src="https://i.ibb.co/CnrWQbF/image.png"
-            alt=""
-          />
-        </Link>
+        <div className={styles.logoWrapper}>
+          <Link className={styles.logoLink} to={RouterPath.main}>
+            <img
+              className={styles.logo}
+              src="https://i.ibb.co/8z5BRDM/logo.png"
+              alt=""
+            />
+            <img
+              className={styles.logoM}
+              src="https://i.ibb.co/JvrWYq9/logo-1.png"
+              alt=""
+            />
+          </Link>
+          <Link
+            className={styles.catalogLink}
+            to={RouterPath.catalog}
+            onClick={handleCloseDrawer}
+          >
+            <MenuOutlined />
+            <Typography.Text>Каталог</Typography.Text>
+          </Link>
+        </div>
 
         <Button
           className={styles.openMenuDrawerButton}

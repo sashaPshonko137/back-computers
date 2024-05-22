@@ -17,7 +17,14 @@ export const Account = () => {
 
   const { userData, isUserDataLoading } = useGetUser();
 
-  const [editAccount] = useEditUsersMutation();
+  const [
+    editAccount,
+    {
+      isLoading: isEditAccountLoading,
+      isSuccess: isEditAccountSuccess,
+      isError: isEditAccountError,
+    },
+  ] = useEditUsersMutation();
 
   const { FormItems } = useGetAccountFields({
     userData,
@@ -26,12 +33,18 @@ export const Account = () => {
 
   const loadedAccountFields = !isUserDataLoading && FormItems;
 
-  const handleEditAccount = (formValues: Record<string, string>) => {
-    editAccount({ id: userData?.id, ...formValues });
-
-    message.success("Данные об аккаунте успешно обновлены");
-    setIsEditAccount(false);
+  const handleEditAccount = async (formValues: Record<string, string>) => {
+    await editAccount({ id: userData?.id, ...formValues });
   };
+
+  React.useEffect(() => {
+    if (!isEditAccountLoading && isEditAccountSuccess) {
+      message.success("Данные об аккаунте успешно обновлены");
+      setIsEditAccount(false);
+    } else if (!isEditAccountLoading && isEditAccountError) {
+      message.error("Произошла ошибка при обновлении данных об аккаунте");
+    }
+  }, [isEditAccountSuccess, isEditAccountError, isEditAccountLoading]);
 
   const handleEdit = () => {
     setIsEditAccount(true);

@@ -1,0 +1,72 @@
+.features-block {
+  padding: 16px;
+  background: inherit;
+  overflow-x: hidden;
+
+  .features__container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    padding: 16px 0;
+    gap: 32px;
+
+    &::-webkit-scrollbar {
+      display: none; /* скрыть полосу прокрутки */
+    }
+  }
+
+  .feature-item {
+    flex: 0 0 auto;
+    
+    width: 183px; /* задайте нужную ширину элемента */
+    height: 206px; /* задайте нужную высоту элемента */
+    background-size: cover;
+    background-size: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 12px;
+
+    &:last-child {
+      margin-right: 0;
+    }
+
+    .feature-item__link {
+      display: flex;
+      flex-direction: column;
+      padding: 8px 8px;
+      width: 100%;
+      height: 100%;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .feature-item__title {
+      font-size: 14px;
+      width: 134px;
+      font-weight: bold;
+      color: #000;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .feature-item__description {
+      font-size: 12px;
+      width: 134px;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+  }
+}
+
+// media queries
+
+@media (max-width: 768px) {
+  .features-block {
+    .features__container {
+      justify-content: start;
+    }
+  }
+}

@@ -7,6 +7,7 @@ import {
   IGetCartsProductsRequest,
   IGetCertainCartsProductsRequest,
 } from "./types";
+import { CustomBuild } from "../custom-builds/types";
 
 export const cartsProductsApi = createApi({
   reducerPath: "cartsProductsApi",
@@ -14,6 +15,8 @@ export const cartsProductsApi = createApi({
     baseUrl: import.meta.env.VITE_BASE_URL,
     credentials: "include",
   }),
+  tagTypes: ['CartsProducts', 'CustomBuild'],
+
   endpoints: (build) => ({
     addCartsProducts: build.mutation<unknown, IAddCartsProductsResponse>({
       query: (body) => ({
@@ -21,12 +24,15 @@ export const cartsProductsApi = createApi({
         method: "POST",
         body: { ...body },
       }),
+      invalidatesTags: ["CartsProducts"],
     }),
 
     getCartsProducts: build.query<unknown, IGetCartsProductsRequest>({
       query: (body) => ({
         url: `/carts-products?page=${body.page}&limit=${body.limit}`,
       }),
+
+      providesTags: ["CartsProducts"],
     }),
 
     deleteCartsProducts: build.mutation<unknown, IDeleteCartsProductsRequest>({
@@ -34,13 +40,14 @@ export const cartsProductsApi = createApi({
         url: `/carts-products?product_id=${body.product_id}&user_id=${body.user_id}`,
         method: "DELETE",
       }),
+
+      invalidatesTags: ["CartsProducts"],
     }),
 
-    getCertainCartsProducts: build.query<
-      unknown,
-      IGetCertainCartsProductsRequest
-    >({
+    getCertainCartsProducts: build.query<unknown, IGetCertainCartsProductsRequest>({
       query: (body) => ({ url: `/carts-products/${body.id}` }),
+
+      providesTags: ["CartsProducts"],
     }),
 
     editCartsProducts: build.mutation<unknown, IEditCartsProductsRequest>({
@@ -49,6 +56,16 @@ export const cartsProductsApi = createApi({
         method: "PATCH",
         body: { product_id: body.product_id, quantity: body.quantity },
       }),
+
+      invalidatesTags: ["CartsProducts"],
+    }),
+
+    addToCart: build.mutation<CustomBuild, { id: number }>({
+      query: ({ id }) => ({
+        url: `custom-builds/build/${id}`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['CartsProducts', 'CustomBuild'],
     }),
   }),
 });
@@ -59,4 +76,5 @@ export const {
   useDeleteCartsProductsMutation,
   useGetCertainCartsProductsQuery,
   useEditCartsProductsMutation,
+  useAddToCartMutation,
 } = cartsProductsApi;

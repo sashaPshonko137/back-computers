@@ -11,13 +11,18 @@ const pathTranslations: Record<string, string> = {
   account: "Аккаунт",
   forbidden: "Нет доступа к странице",
   not_authorized: "Не авторизован",
-  wine: "Вино",
-  cognac: "Коньяк",
-  sparkling_wine: "Игристое вино",
-  whisky: "Виски",
-  brandy: "Бренди",
-  beer: "Пиво",
-  liquor: "Ликер",
+  help: "Помощь",
+  service: "Сервисный центр",
+  giftcard: "Подарочные карты",
+  custombuild: "Конструктор",
+  processor: "Процессоры",
+  ram: "Оперативная память",
+  motherboard: "Материнские платы",
+  cooling: "Охлаждения",
+  videocard: "Видеокарты",
+  powerblock: "Блоки питания",
+  case: "Корпуса",
+  drive: "Диски",
 };
 
 export const DynamicBreadCrumb = () => {
@@ -50,7 +55,7 @@ export const DynamicBreadCrumb = () => {
   ];
 
   return (
-    <Breadcrumb className={styles.breadcrumbWrapper} separator=">">
+    <Breadcrumb className={styles.breadcrumbWrapper} separator="/">
       {breadcrumbItems}
     </Breadcrumb>
   );

@@ -8,6 +8,7 @@ export type IAddProductsRequest = {
   price: number;
   image_id: number;
   type_id: number;
+  ram_types?: string[];
 };
 
 export interface IGetProductsRequest {

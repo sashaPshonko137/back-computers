@@ -1,7 +1,5 @@
 import {
   BadRequestException,
-  forwardRef,
-  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -10,7 +8,6 @@ import { PrismaService } from 'src/utils/db/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ImagesService } from 'src/images/images.service';
 import { TypesService } from 'src/types/types.service';
-import { RamTypesService } from 'src/ram_types/ram_types.service';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
@@ -19,8 +16,6 @@ export class ProductsService {
     private db: PrismaService,
     private imagesService: ImagesService,
     private typesService: TypesService,
-    @Inject(forwardRef(() => RamTypesService))
-    private ramTypesService: RamTypesService,
   ) {}
   async create(createProductDto: CreateProductDto) {
     const image = await this.imagesService.findOne(createProductDto.image_id);
@@ -284,6 +279,7 @@ export class ProductsService {
         console.log(processorWhere);
         return await this.db.products.findMany({
           where: processorWhere,
+          include: { type: true, characteristics: true, image: true },
         });
 
       case 'motherboard':
@@ -304,7 +300,8 @@ export class ProductsService {
         if (ram_id) {
           if (motherboard.ram_capacity < build.ram_quantity) {
             throw new BadRequestException(
-              'Количество планок оперативной памяти не может быть больше чем количество слотов оперативной памяти в материнской плате.');
+              'Количество планок оперативной памяти не может быть больше чем количество слотов оперативной памяти в материнской плате.',
+            );
           }
           motherboardWhere.ram_types = {
             some: {
@@ -317,6 +314,7 @@ export class ProductsService {
         }
         return await this.db.products.findMany({
           where: motherboardWhere,
+          include: { type: true, characteristics: true, image: true },
         });
 
       case 'videocard':
@@ -339,6 +337,7 @@ export class ProductsService {
         }
         return await this.db.products.findMany({
           where: videocardWhere,
+          include: { type: true, characteristics: true, image: true },
         });
       case 'ram':
         const ramWhere: Prisma.productsWhereInput = {
@@ -357,6 +356,7 @@ export class ProductsService {
         }
         return await this.db.products.findMany({
           where: ramWhere,
+          include: { type: true, characteristics: true, image: true },
         });
 
       case 'powerblock':
@@ -368,6 +368,7 @@ export class ProductsService {
         };
         return await this.db.products.findMany({
           where: powerblockWhere,
+          include: { type: true, characteristics: true, image: true },
         });
 
       case 'drive':
@@ -379,6 +380,7 @@ export class ProductsService {
         };
         return await this.db.products.findMany({
           where: driveWhere,
+          include: { type: true, characteristics: true, image: true },
         });
 
       case 'case':
@@ -401,6 +403,7 @@ export class ProductsService {
         }
         return await this.db.products.findMany({
           where: caseWhere,
+          include: { type: true, characteristics: true, image: true },
         });
 
       case 'cooling':
@@ -418,6 +421,7 @@ export class ProductsService {
         }
         return await this.db.products.findMany({
           where: coolingWhere,
+          include: { type: true, characteristics: true, image: true },
         });
       default:
         throw new NotFoundException('Такой категории не существует.');

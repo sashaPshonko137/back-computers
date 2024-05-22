@@ -4,6 +4,7 @@ import { Routes, Route } from "react-router-dom";
 
 import { TAppRouteProps, routeConfig } from "configs/route-config";
 
+import { RequireAdmin } from "./RequireAdmin";
 import { RequireAuth } from "./RequireAuth";
 
 export const AppRouter = () => {
@@ -13,7 +14,9 @@ export const AppRouter = () => {
         key={route.path}
         path={route.path}
         element={
-          route.authOnly ? (
+          route.adminOnly ? (
+            <RequireAdmin>{route.element}</RequireAdmin>
+          ) : route.authOnly ? (
             <RequireAuth>{route.element}</RequireAuth>
           ) : (
             route.element

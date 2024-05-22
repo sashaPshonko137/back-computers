@@ -36,12 +36,14 @@ export const AddProductModal = (props: IAddProductModalProps) => {
     isEdit: false,
   });
 
-  const onFinishAddProduct = async (formValues: IAddProductsRequest) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const onFinishAddProduct = async (formValues: any) => {
     const addProductData = {
       ...formValues,
       image_id: +formValues.image_id,
       type_id: +formValues.type_id,
       characteristics,
+      ram_type: formValues.ram_types?.map((type: string) => ({ name: type })) || undefined,
     };
 
     await addProduct(addProductData);

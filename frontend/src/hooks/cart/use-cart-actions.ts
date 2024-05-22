@@ -6,6 +6,7 @@ import {
 } from "store/api/carts/carts-api";
 import {
   useAddCartsProductsMutation,
+  useAddToCartMutation,
   useDeleteCartsProductsMutation,
   useEditCartsProductsMutation,
 } from "store/api/cartsProducts/carts-products-api";
@@ -36,6 +37,7 @@ export const useCartActions = () => {
 
   const [addToCart] = useAddCartsProductsMutation();
   const [deleteFromCart] = useDeleteCartsProductsMutation();
+  const [addToCartBuild] = useAddToCartMutation();
 
   const [changeProductQuantity] = useEditCartsProductsMutation();
   const [clearCart] = useClearCartsMutation();
@@ -44,6 +46,17 @@ export const useCartActions = () => {
     return cartProductsData?.carts_products.some(
       (product) => product.product.id === productId
     );
+  };
+
+  const handleAddToCartBuild = async (id: number) => {
+    try {
+      await addToCartBuild({ id }).unwrap();
+      message.success('Сборка добавлена в корзину');
+    refetchCartProductsData();
+    } catch (err) {
+      console.error(err);
+      message.error('Ошибка при добавлении сборки в корзину');
+    }
   };
 
   const handleActionCart = async (args: ICartActionArgs) => {
@@ -115,6 +128,7 @@ export const useCartActions = () => {
   return {
     cartProductsData,
     refetchCartProductsData,
+    handleAddToCartBuild,
     handleActionCart,
     getIsProductInCart,
     handleChangeProductQuantity,

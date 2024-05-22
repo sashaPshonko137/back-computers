@@ -45,4 +45,9 @@ export class CustomBuildsController {
   remove(@Param('id') id: string) {
     return this.customBuildsService.remove(+id);
   }
+
+  @Post('build/:id')
+  addToCart(@Param('id') id: string) {
+    return this.customBuildsService.addToCart(+id);
+  }
 }

@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
+  forwardRef,
 } from '@nestjs/common';
 import { CreateCustomBuildDto } from './dto/create-custom_build.dto';
 import { UpdateCustomBuildDto } from './dto/update-custom_build.dto';
@@ -16,6 +19,7 @@ export class CustomBuildsService {
   constructor(
     private db: PrismaService,
     private productsService: ProductsService,
+    @Inject(forwardRef(() => UsersService))
     private usersSerice: UsersService,
     private ramTypesService: RamTypesService,
     private cartsService: CartsService,
@@ -180,7 +184,62 @@ export class CustomBuildsService {
   }
 
   async findOne(id: number) {
-    const build = await this.db.custom_builds.findFirst({ where: { id } });
+    const build = await this.db.custom_builds.findFirst({
+      where: { id },
+      include: {
+        processor: {
+          include: {
+            image: true,
+            characteristics: true,
+            ram_types: true,
+          },
+        },
+        motherboard: {
+          include: {
+            image: true,
+            characteristics: true,
+            ram_types: true,
+          },
+        },
+        videocard: {
+          include: {
+            image: true,
+            characteristics: true,
+          },
+        },
+        ram: {
+          include: {
+            image: true,
+            characteristics: true,
+            ram_types: true,
+          },
+        },
+        case: {
+          include: {
+            image: true,
+            characteristics: true,
+          },
+        },
+        cooling: {
+          include: {
+            image: true,
+            characteristics: true,
+          },
+        },
+        drive: {
+          include: {
+            image: true,
+            characteristics: true,
+          },
+        },
+        powerblock: {
+          include: {
+            image: true,
+            characteristics: true,
+          },
+        },
+      },
+    });
     if (!build) {
       throw new NotFoundException('Сборка не найдена.');
     }
@@ -209,7 +268,7 @@ export class CustomBuildsService {
       processor,
       motherboard,
       videocard,
-      ram_types,
+      ram_types_processor,
       ram_types_ram,
       ram_types_motherboard,
       case_product,
@@ -219,8 +278,8 @@ export class CustomBuildsService {
       motherboard_id && this.productsService.findOne(motherboard_id),
       videocard_id && this.productsService.findOne(videocard_id),
       processor_id && this.ramTypesService.findByProductId(processor_id),
-      processor_id && this.ramTypesService.findByProductId(ram_id),
-      processor_id && this.ramTypesService.findByProductId(motherboard_id),
+      ram_id && this.ramTypesService.findByProductId(ram_id),
+      motherboard_id && this.ramTypesService.findByProductId(motherboard_id),
       case_id && this.productsService.findOne(case_id),
       cooling_id && this.productsService.findOne(cooling_id),
     ]);
@@ -262,9 +321,12 @@ export class CustomBuildsService {
     }
 
     if (
-      ram_types &&
+      ram_types_processor &&
       ram_types_ram &&
-      !ram_types.some((ram_type) => ram_type.name === ram_types_ram[0].name)
+      (ram_types_processor[0].name === ram_types_ram[0].name ||
+        ram_types_processor[1].name === ram_types_ram[1].name ||
+        ram_types_processor[0].name === ram_types_ram[1].name ||
+        ram_types_processor[1].name === ram_types_ram[0].name)
     ) {
       throw new BadRequestException(
         'Процессор не совместим с типом оперативной памяти!',
@@ -272,21 +334,25 @@ export class CustomBuildsService {
     }
 
     if (
-      ram_types &&
-      ram_types_motherboard[0].name &&
-      !ram_types.some(
-        (ram_type) => ram_type.name === ram_types_motherboard[0].name,
-      )
+      ram_types_processor &&
+      ram_types_motherboard &&
+      (ram_types_processor[0].name === ram_types_motherboard[0].name ||
+        ram_types_processor[1].name === ram_types_motherboard[1].name ||
+        ram_types_processor[0].name === ram_types_motherboard[1].name ||
+        ram_types_processor[1].name === ram_types_motherboard[0].name)
     ) {
       throw new BadRequestException(
         'Материнская плата не совместима с типом оперативной памяти процессора!',
       );
     }
-
+    console.log(ram_types_ram, ram_types_motherboard);
     if (
       ram_types_ram &&
       ram_types_motherboard &&
-      ram_types_ram[0].name === ram_types_motherboard[0].name
+      (ram_types_ram[0].name === ram_types_motherboard[0].name ||
+        ram_types_ram[1].name === ram_types_motherboard[1].name ||
+        ram_types_ram[0].name === ram_types_motherboard[1].name ||
+        ram_types_ram[1].name === ram_types_motherboard[0].name)
     ) {
       throw new BadRequestException(
         'Материнская плата не совместима с типом оперативной памяти!',
@@ -355,21 +421,39 @@ export class CustomBuildsService {
     const build = await this.findOne(id);
 
     const user_id = build.user_id;
-
     const cart_id = (await this.cartsService.findOneByUserId(user_id)).id;
-
     const ram_quantity = build.ram_quantity;
 
-    if (ram_quantity) delete build.ram_quantity;
+    // Удаление ненужных свойств из build
+    const {
+      created,
+      id: buildId,
+      user_id: buildUserId,
+      processor,
+      motherboard,
+      videocard,
+      ram,
+      cooling,
+      drive,
+      powerblock,
+      case: buildCase,
+      ...cleanBuild
+    } = build;
 
-    const products = Object.entries(build).splice(0, 3);
+    const products = Object.entries(cleanBuild)
+      .filter(([key, value]) => typeof value === 'number')
+      .map(([key, value]) => ({
+        cart_id: cart_id,
+        product_id: value as number, // Явное приведение типа
+        quantity: key === 'ram_id' ? ram_quantity || 1 : 1,
+      }));
+
+    if (products.length === 0) {
+      throw new Error('No valid products to add to the cart');
+    }
 
     await this.db.carts_products.createMany({
-      data: products.map((product: [key: string, value: number]) => ({
-        cart_id: cart_id,
-        product_id: product[1],
-        quantity: product[0] === 'ram_id' ? ram_quantity : 1,
-      })),
+      data: products,
     });
 
     return await this.clear(build.user_id);

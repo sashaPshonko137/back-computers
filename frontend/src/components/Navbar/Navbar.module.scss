@@ -9,7 +9,44 @@
 
 .logo {
   width: 65px;
-  border-radius: 10px;
+  height: 29px;
+}
+
+.logoM {
+  display: none;
+}
+
+.logoLink {
+  height: 29px;
+}
+
+.catalogMobileLink {
+  display: none;
+}
+
+.catalogLink {
+  text-decoration: none;
+  color: #fff;
+  display: flex;
+  padding: 9px;
+  border-radius: 12px;
+  gap: 8px;
+  align-items: center;
+  background-color: #ffffff20;
+  span {
+    color: #fff;
+  }
+}
+
+.logoWrapper {
+  background-color: #fc8507;
+  max-width: 250px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px;
+  border-radius: 12px;
 }
 
 .openMenuDrawerButton {
@@ -49,6 +86,29 @@
   .openMenuDrawerButton {
     display: block;
   }
+
+  .logoM {
+    display: block;
+    width: 65px;
+    height: 29px;
+  }
+
+  .logo {
+    display: none; 
+  }
+
+  .logoWrapper {
+    background-color: transparent;
+    max-width: fit-content;
+  }
+  .catalogLink {
+    display: none;
+  }
+
+  .catalogMobileLink {
+    display: block;
+  }
+
 
   .menuPoints {
     display: none;

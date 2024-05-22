@@ -11,11 +11,7 @@ interface IRequireAuthProps {
 export function RequireAuth(props: IRequireAuthProps) {
   const { children } = props;
 
-  const { userData, isUserDataLoading, isUserAdmin } = useGetUser();
-
-  if (userData && !isUserAdmin) {
-    return <Navigate to={RouterPath.forbidden} />;
-  }
+  const { userData, isUserDataLoading } = useGetUser();
 
   if (!isUserDataLoading && !userData) {
     return <Navigate to={RouterPath.not_authorized} />;

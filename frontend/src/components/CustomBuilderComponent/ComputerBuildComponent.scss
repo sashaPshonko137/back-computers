@@ -1,0 +1,115 @@
+.computer-build {
+  padding: 20px;
+  background: #f0f2f5;
+
+  &__status {
+    background: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+
+    h3 {
+      margin-bottom: 10px;
+    }
+
+    .ui-link_blue {
+      color: #1890ff;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+  }
+
+  &__assembly {
+    background: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .price {
+      font-weight: bold;
+    }
+  }
+
+  &__controls {
+    background: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+  }
+
+  &__products {
+    background: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+
+    .product-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+
+      &__image {
+        width: 100px;
+        height: 100px;
+        margin-bottom: 10px;
+        object-fit: cover;
+      }
+
+      &__details {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        .product-item__name {
+          font-weight: bold;
+          margin-bottom: 10px;
+        }
+      }
+    }
+  }
+
+  &__current {
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+
+    .current-item {
+      display: flex;
+      align-items: center;
+
+      &__image {
+        width: 50px;
+        height: 50px;
+        margin-right: 20px;
+        object-fit: cover;
+      }
+
+      &__details {
+        display: flex;
+        flex-direction: column;
+
+        .current-item__name {
+          font-weight: bold;
+        }
+      }
+    }
+  }
+}
+
+// media queries
+
+@media screen and (max-width: 768px) {
+  .computer-build {
+    padding: 10px;
+  }
+}

@@ -1,0 +1,44 @@
+.homepage__brands {
+  padding: 16px;
+  border-radius: 12px;
+  background: inherit;
+  overflow-x: hidden;
+  box-sizing: border-box;
+
+  .brands__container {
+    display: flex;
+    overflow-x: scroll;
+    align-items: center;
+    justify-content: space-evenly;
+    overflow-y: hidden;
+    white-space: nowrap;
+    gap: 32px;
+    padding: 16px 32px;
+
+    &::-webkit-scrollbar {
+      display: none; /* скрыть полосу прокрутки */
+    }
+  }
+
+  .brand__card {
+    background-color: #f7f7f7;
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .brand-card__image {
+    width: 115px;
+    height: 35px;
+    object-fit: contain;
+  }
+}
+
+// media queries
+
+@media screen and (max-width: 768px) {
+  .homepage__brands {
+    .brands__container {
+      justify-content: start;
+    }
+  }
+}

@@ -4,6 +4,7 @@ export const accountFieldsTitles = {
   lastname: "Отчество",
   email: "E-mail",
   password: "Пароль",
+  role: "Права доступа",
 };
 
 export const accountFieldsDataIndexes = {
@@ -12,4 +13,5 @@ export const accountFieldsDataIndexes = {
   lastname: "lastname",
   email: "email",
   password: "password",
+  role: "role",
 };

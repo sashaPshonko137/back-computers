@@ -1,9 +1,8 @@
-import { Card } from "antd";
+import { Typography } from "antd";
 import { Link } from "react-router-dom";
 
 import { CartButtons } from "components/CartButtons/CartButtons";
 import { ImageInCard } from "components/ImageInCard/ImageInCard";
-import { ShadowCard } from "components/ShadowCard/ShadowCard";
 
 import { IProduct } from "types/IProduct";
 
@@ -18,21 +17,32 @@ export const ProductCard = (props: IProductCardProps) => {
 
   return (
     <Link className={styles.link} to={`${product.id}`} key={product.id}>
-      <ShadowCard
-        className={styles.cardWrapper}
-        key={product.id}
-        cover={<ImageInCard imageUrl={product.image.filename} />}
-      >
-        <Card.Meta
-          title={
-            <>
-              <p className={styles.cardText}>{product.price} ₽</p>
-              <p className={styles.cardText}>{product.name}</p>
-            </>
-          }
-          description={<CartButtons productId={product.id} />}
-        />
-      </ShadowCard>
+      <div className={styles.shadowCard}>
+        <div className={styles.cardContent}>
+          <div className={styles.imageContainer}>
+            <ImageInCard imageUrl={product.image.filename} />
+          </div>
+          <div className={styles.textContainer}>
+            <Typography.Text className={styles.cardTitle} ellipsis>
+              {product.name}
+            </Typography.Text>{" "}
+            <br />
+            <Typography.Paragraph
+              ellipsis={{
+                rows: 5,
+              }}
+            >
+              {product.description}
+            </Typography.Paragraph>
+          </div>
+          <div className={styles.actionsContainer}>
+            <Typography.Text className={styles.cardTitle}>
+              {product.price} ₽
+            </Typography.Text>
+            <CartButtons productId={product.id} />
+          </div>
+        </div>
+      </div>
     </Link>
   );
 };
